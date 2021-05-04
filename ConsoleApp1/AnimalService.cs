@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Models;
 
 namespace ConsoleApp1
@@ -26,11 +30,26 @@ namespace ConsoleApp1
                     Colour = csvLine[1],
                     Type = Enum.Parse<AnimalType>(csvLine[2])
                 };
-
+                
                 animals.Add(animal);
             }
 
             return animals;
+        }
+
+        public List<Animal> GetAnimals_CSVHelper()
+        {
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                PrepareHeaderForMatch = args => Regex.Replace(args.Header, @"\s", string.Empty)
+            };
+            using (var reader = new StreamReader(CsvLocation))
+            using (var csv = new CsvReader(reader, config))
+            {
+                var records = csv.GetRecords<Animal>();
+               // records.Take(100).ToList();
+                return records.ToList();
+            }
         }
     }
 }
